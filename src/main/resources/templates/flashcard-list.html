@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>플래시카드 목록</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f0f2f5; margin: 0; padding: 2rem; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { text-align: center; color: #333; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 5px solid #007bff; position: relative; }
+        .card .front { font-weight: bold; color: #333; margin-bottom: 0.5rem; }
+        .card .back { color: #666; font-size: 0.9rem; }
+        .actions { text-align: center; margin-top: 2rem; }
+        .btn { padding: 0.75rem 1.5rem; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
+        .btn:hover { background-color: #0056b3; }
+        .empty { text-align: center; color: #999; margin-top: 3rem; }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>나의 플래시카드 목록</h1>
+        <div th:if="${#lists.isEmpty(flashcards)}" class="empty">
+            아직 추가된 플래시카드가 없습니다.
+        </div>
+        <div class="card-grid">
+            <div class="card" th:each="card : ${flashcards}">
+                <div class="front" th:text="${card.front}">앞면</div>
+                <hr>
+                <div class="back" th:text="${card.back}">뒷면</div>
+            </div>
+        </div>
+        <div class="actions">
+            <a class="btn" th:href="@{/flashcards/new}">새 카드 추가</a>
+            <a class="btn practice-btn" th:href="@{/flashcards/practice}" th:if="${!#lists.isEmpty(flashcards)}">연습하기</a>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /* Thymeleaf를 이용해 서버의 데이터를 JS 변수로 변환 */
+        const flashcardsFromSession = /*[[${flashcards}]]*/ [];
+        
+        console.log("=== 서버에서 받아온 플래시카드 목록 ===");
+        console.log(flashcardsFromSession);
+        
+        // 데이터가 있다면 첫 번째 카드의 내용을 개별적으로 확인 가능
+        if (flashcardsFromSession.length > 0) {
+            console.log("첫 번째 카드 앞면:", flashcardsFromSession[0].front);
+        }
+    </script>
+</body>
+</html>

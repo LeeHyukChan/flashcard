@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>플래시카드 연습</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f7fa;
+            --text-color: #333;
+            --bg-color: #eef2f7;
+            --card-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .settings {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .settings select {
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 0.9rem;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: right;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            color: #666;
+        }
+
+        /* 3D Card Flip */
+        .flashcard-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            cursor: pointer;
+            margin: 2rem 0;
+        }
+
+        .flashcard {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            box-shadow: var(--card-shadow);
+            border-radius: 20px;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            box-sizing: border-box;
+            border-radius: 20px;
+            background: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .hint {
+            margin-top: 2rem;
+            color: #888;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a th:href="@{/flashcards}" class="back-link">← 목록으로</a>
+        <h2>연습 모드</h2>
+    </div>
+
+    <div class="settings">
+        <div>
+            <label>진행 방향: </label>
+            <select id="mode-select">
+                <option value="front-to-back">앞면 → 뒷면</option>
+                <option value="back-to-front">뒷면 → 앞면</option>
+            </select>
+        </div>
+        <div>
+            <label>순서: </label>
+            <select id="order-select">
+                <option value="normal">기본 순서</option>
+                <option value="shuffle">랜덤 섞기</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div id="progress-text" class="progress-text">0 / 0</div>
+    </div>
+
+    <div class="flashcard-container" id="card-container">
+        <div class="flashcard" id="card">
+            <div class="flashcard-front" id="card-front">앞면</div>
+            <div class="flashcard-back" id="card-back">뒷면</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-secondary" id="prev-btn">이전</button>
+        <button class="btn btn-primary" id="flip-btn">뒤집기</button>
+        <button class="btn btn-secondary" id="next-btn">다음</button>
+    </div>
+
+    <div class="hint">카드를 클릭하거나 스페이스바를 눌러서 뒤집을 수 있습니다.</div>
+
+    <script th:inline="javascript">
+        /* Thymeleaf data */
+        const originalFlashcards = /*[[${flashcards}]]*/ [];
+        
+        let flashcards = [...originalFlashcards];
+        let currentIndex = 0;
+        let isFlipped = false;
+        let practiceMode = 'front-to-back'; // front-to-back or back-to-front
+        let practiceOrder = 'normal'; // normal or shuffle
+
+        const card = document.getElementById('card');
+        const cardFront = document.getElementById('card-front');
+        const cardBack = document.getElementById('card-back');
+        const cardContainer = document.getElementById('card-container');
+        
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const flipBtn = document.getElementById('flip-btn');
+        
+        const modeSelect = document.getElementById('mode-select');
+        const orderSelect = document.getElementById('order-select');
+        
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+
+        function updateCard() {
+            if (flashcards.length === 0) return;
+            
+            const currentCard = flashcards[currentIndex];
+            
+            if (practiceMode === 'front-to-back') {
+                cardFront.innerText = currentCard.front;
+                cardBack.innerText = currentCard.back;
+            } else {
+                cardFront.innerText = currentCard.back;
+                cardBack.innerText = currentCard.front;
+            }
+            
+            // Reset flip state when moving to a new card
+            card.classList.remove('flipped');
+            isFlipped = false;
+            
+            // Update buttons
+            prevBtn.disabled = (currentIndex === 0);
+            nextBtn.disabled = (currentIndex === flashcards.length - 1);
+            
+            // Update progress
+            const progress = ((currentIndex + 1) / flashcards.length) * 100;
+            progressFill.style.width = `${progress}%`;
+            progressText.innerText = `${currentIndex + 1} / ${flashcards.length}`;
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            card.classList.toggle('flipped', isFlipped);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Event Listeners
+        cardContainer.addEventListener('click', flipCard);
+        flipBtn.addEventListener('click', flipCard);
+
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < flashcards.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        });
+
+        modeSelect.addEventListener('change', (e) => {
+            practiceMode = e.target.value;
+            updateCard();
+        });
+
+        orderSelect.addEventListener('change', (e) => {
+            practiceOrder = e.target.value;
+            if (practiceOrder === 'shuffle') {
+                flashcards = shuffleArray([...originalFlashcards]);
+            } else {
+                flashcards = [...originalFlashcards];
+            }
+            currentIndex = 0;
+            updateCard();
+        });
+
+        // Keyboard Support
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                flipCard();
+            } else if (e.code === 'ArrowLeft') {
+                if (!prevBtn.disabled) {
+                    currentIndex--;
+                    updateCard();
+                }
+            } else if (e.code === 'ArrowRight') {
+                if (!nextBtn.disabled) {
+                    currentIndex++;
+                    updateCard();
+                }
+            }
+        });
+
+        // Initialize
+        if (originalFlashcards.length > 0) {
+            updateCard();
+        } else {
+            window.location.href = '/flashcards/new';
+        }
+    </script>
+</body>
+</html>

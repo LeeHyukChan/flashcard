@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>플래시카드 만들기</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h1 { text-align: center; color: #333; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; color: #666; }
+        input[type="text"] { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 0.75rem; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        button:hover { background-color: #0056b3; }
+        .link { display: block; text-align: center; margin-top: 1rem; text-decoration: none; color: #007bff; }
+    </style>
+</head>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // session. 키워드를 사용하여 세션에 접근
+    const user = /*[[${session.loginUser}]]*/ 'defaultUser';
+    console.log("세션 데이터:", user);
+    /*]]>*/
+</script>
+<body>
+
+    
+    <div class="container">
+        <h1>플래시카드 입력</h1>
+        <form th:action="@{/flashcards/new}" th:object="${flashcard}" method="post">
+            <div class="form-group">
+                <label for="front">앞면 (단d어/질문)</label>
+                <input type="text" id="front" th:field="*{front}" placeholder="앞면 내용을 입력하세요" required>
+            </div>
+            <div class="form-group">
+                <label for="back">뒷면 (뜻/답변)</label>
+                <input type="text" id="back" th:field="*{back}" placeholder="뒷면 내용을 입력하세요" required>
+            </div>
+            <button type="submit">추가하기</button>
+        </form>
+        <a class="link" th:href="@{/flashcards}">목록 보기</a>
+    </div>
+</body>
+</html>

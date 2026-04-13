@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: flashcard
+  thymeleaf:
+    cache: false
+    prefix: file:src/main/resources/templates/ # 로컬 파일 시스템에서 직접 읽도록 설정 (강력한 방법)
+    check-template-location: true
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java,src/main/resources # 감시할 경로 명시
+    livereload:
+      enabled: true
+  web:
+    resources:
+      static-locations: file:src/main/resources/static/ # 정적 파일도 실시간 반영
+
