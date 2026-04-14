@@ -30,6 +30,12 @@
                 <div class="front" th:text="${card.front}">앞면</div>
                 <hr>
                 <div class="back" th:text="${card.back}">뒷면</div>
+                <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <a th:href="@{/flashcards/edit/{id}(id=${card.id})}" style="font-size: 0.8rem; color: #007bff; text-decoration: none;">수정</a>
+                    <form th:action="@{/flashcards/delete/{id}(id=${card.id})}" method="post" style="display: inline;">
+                        <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 0.8rem; padding: 0;">삭제</button>
+                    </form>
+                </div>
             </div>
         </div>
         <div class="actions">

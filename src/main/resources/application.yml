@@ -15,3 +15,16 @@ spring:
     resources:
       static-locations: file:src/main/resources/static/ # 정적 파일도 실시간 반영
 
+  datasource:
+    url: jdbc:postgresql://localhost:5432/placecard?currentSchema=base
+    username: postgres
+    password: 1234 # 실제 비밀번호로 변경해주세요!
+    driver-class-name: org.postgresql.Driver
+    
+  jpa:
+    hibernate:
+      ddl-auto: update # 엔티티 구조 변경 시 DB에 반영 (배포 시에는 validate나 none 권장)
+    properties:
+      hibernate:
+        format_sql: true # SQL 포맷팅
+    show-sql: true # 실행되는 SQL 로그 출력

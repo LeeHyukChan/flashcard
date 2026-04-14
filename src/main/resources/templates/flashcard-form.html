@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <title>플래시카드 만들기</title>
     <style>
-        body { font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; margin: 0; }
+        body { font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; margin: 0; position: relative; }
+        .top-right { position: absolute; top: 1rem; right: 1.5rem; }
+        .login-link { text-decoration: none; color: #666; font-size: 0.9rem; font-weight: bold; }
+        .login-link:hover { color: #007bff; }
         .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         h1 { text-align: center; color: #333; }
         .form-group { margin-bottom: 1rem; }
@@ -26,17 +29,17 @@
 
     
     <div class="container">
-        <h1>플래시카드 입력</h1>
-        <form th:action="@{/flashcards/new}" th:object="${flashcard}" method="post">
+        <h1 th:text="${flashcard.id == null ? '플래시카드 입력' : '플래시카드 수정'}">플래시카드 입력</h1>
+        <form th:action="${flashcard.id == null ? '/flashcards/new' : '/flashcards/edit/' + flashcard.id}" th:object="${flashcard}" method="post">
             <div class="form-group">
-                <label for="front">앞면 (단d어/질문)</label>
+                <label for="front">앞면 (단어/질문)</label>
                 <input type="text" id="front" th:field="*{front}" placeholder="앞면 내용을 입력하세요" required>
             </div>
             <div class="form-group">
                 <label for="back">뒷면 (뜻/답변)</label>
                 <input type="text" id="back" th:field="*{back}" placeholder="뒷면 내용을 입력하세요" required>
             </div>
-            <button type="submit">추가하기</button>
+            <button type="submit" th:text="${flashcard.id == null ? '추가하기' : '저장하기'}">추가하기</button>
         </form>
         <a class="link" th:href="@{/flashcards}">목록 보기</a>
     </div>
